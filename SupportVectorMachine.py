@@ -19,18 +19,19 @@ class SVM:
 
         for _ in range(self.n_iterations):
             for i, sample in enumerate(X):
-                gradient_0_w = 2 * self.lambda_param * self.w                     # dJ/dw = 2λw
-                gradient_0_b = 0                                                  # dJ/db = 0
-                gradient_1_w = 2 * self.lambda_param * self.w - y_[i] * X[i]      # dJ/dw = 2λw - yixi
-                gradient_1_b = y_[i]                                              # dJ/db = yi
-                hyperplaneFunc = y_[i] * (np.dot(sample, self.w) - self.b) >= 1   # J = λw^2 + sum(max(0, 1-yi(wx-b))
+                hyperplaneFunc = y_[i] * (np.dot(sample, self.w) - self.b) >= 1        # J = λw^2 + sum(max(0, 1-yi(wx-b))
+
+                gradient_0_w = 2 * self.lambda_param * self.w                          # dJ/dw = 2λw
+                gradient_0_b = 0                                                       # dJ/db = 0
+                gradient_1_w = 2 * self.lambda_param * self.w - np.dot(sample, y_[i])  # dJ/dw = 2λw - yixi
+                gradient_1_b = y_[i]                                                   # dJ/db = yi
 
                 if hyperplaneFunc:
-                    self.w -= self.alpha_param * (2 * self.lambda_param * self.w)  # w -= dJ/dw
-                    self.b -= 0  # b -= dJ/db
+                    self.w -= self.alpha_param * gradient_0_w  # w = w - α * dJ/dw
+                    self.b -= self.alpha_param * gradient_0_b  # b = b - α * dJ/db
                 else:
-                    self.w -= self.alpha_param * (2 * self.lambda_param * self.w - np.dot(sample, y_[i]))  # w -= dJ/dw
-                    self.b -= self.alpha_param * y_[i]  # b -= dJ/db
+                    self.w -= self.alpha_param * gradient_1_w  # w = w - α * dJ/dw
+                    self.b -= self.alpha_param * gradient_1_b  # b = b - α * dJ/db
 
     def predict(self, X):
         prediction = np.dot(X, self.w) - self.b
