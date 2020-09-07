@@ -1,15 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
-
 from SupportVectorMachine import SVM
-
-X, y = datasets.make_blobs(n_samples=50, n_features=2, centers=2, cluster_std=1.05, random_state=40)
-y = np.where(y == 0, -1, 1)
-
-clf = SVM()
-clf.training(X, y)
-# predictions = clf.predict(X)
 
 
 def visualize_svm():
@@ -18,19 +10,24 @@ def visualize_svm():
 
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    plt.scatter(X[:, 0], X[:, 1], marker='o', c=y)
+
+    color = np.where(y >= 1, 'r', 'b')
+    plt.scatter(X[:, 0], X[:, 1], marker='o', c=color)
+
+    color = np.where(y_cv >= 1, 'r', 'b')
+    plt.scatter(X_cv[:, 0], X_cv[:, 1], marker='x', c=color)
 
     x0_1 = np.amin(X[:, 0])
     x0_2 = np.amax(X[:, 0])
 
-    x1_1 = get_hyperplane_value(x0_1, clf.w, clf.b, 0)
-    x1_2 = get_hyperplane_value(x0_2, clf.w, clf.b, 0)
+    x1_1 = get_hyperplane_value(x0_1, svm.w, svm.b, 0)
+    x1_2 = get_hyperplane_value(x0_2, svm.w, svm.b, 0)
 
-    x1_1_m = get_hyperplane_value(x0_1, clf.w, clf.b, -1)
-    x1_2_m = get_hyperplane_value(x0_2, clf.w, clf.b, -1)
+    x1_1_m = get_hyperplane_value(x0_1, svm.w, svm.b, -1)
+    x1_2_m = get_hyperplane_value(x0_2, svm.w, svm.b, -1)
 
-    x1_1_p = get_hyperplane_value(x0_1, clf.w, clf.b, 1)
-    x1_2_p = get_hyperplane_value(x0_2, clf.w, clf.b, 1)
+    x1_1_p = get_hyperplane_value(x0_1, svm.w, svm.b, 1)
+    x1_2_p = get_hyperplane_value(x0_2, svm.w, svm.b, 1)
 
     ax.plot([x0_1, x0_2], [x1_1, x1_2], 'y--')
     ax.plot([x0_1, x0_2], [x1_1_m, x1_2_m], 'k')
@@ -42,5 +39,15 @@ def visualize_svm():
 
     plt.show()
 
+
+X, y = datasets.make_blobs(n_samples=150, n_features=2, centers=2, cluster_std=2, random_state=40)
+svm = SVM()
+svm.training(X, y)
+
+X_cv, y_cv = datasets.make_blobs(n_samples=30, n_features=2, centers=2, cluster_std=5, random_state=40)
+
+y_predicted = svm.predict(X_cv)
+
+print(svm.f1_score(y_cv, y_predicted))
 
 visualize_svm()

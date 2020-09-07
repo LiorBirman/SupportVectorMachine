@@ -33,6 +33,21 @@ class SVM:
                     self.w -= self.alpha_param * gradient_1_w  # w = w - α * dJ/dw
                     self.b -= self.alpha_param * gradient_1_b  # b = b - α * dJ/db
 
+    def f1_score(self, y_cv, y_predicted):
+        measures_vector = y_predicted * 10 + y_cv  # code for: true_positive = 11, false_positive = 10, false_negative = 01
+
+        true_positive = sum(measures_vector == 11)
+        false_positive = sum(measures_vector == 10)
+        false_negative = sum(measures_vector == 1)
+
+        precision = true_positive / (true_positive + false_positive)  # percentage of true classification, out of all "1" classified
+        recall = true_positive / (true_positive + false_negative)     # percentage of true classification, out of all actual "1"
+        score = 2 * ((precision * recall) / (precision + recall))     # @@@ COMMENT @@@
+
+        return score, precision, recall
+        pass
+
+
     def predict(self, X):
         prediction = np.dot(X, self.w) - self.b
         return np.sign(prediction)
