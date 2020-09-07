@@ -9,7 +9,7 @@ class SVM:
         self.w = None
         self.b = None
 
-    def fit(self, X, y):
+    def training(self, X, y):
         n_features = X.shape[1]
 
         y_ = np.where(y <= 0, -1, 1)  # adjust y values to -1 or 1 for classification
