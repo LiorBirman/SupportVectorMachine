@@ -37,7 +37,7 @@ class LinearSVM:
 
 # Constructor
 
-    def __init__(self, alpha_param=0.001, lambda_param=0.01, n_iterations=1000):
+    def __init__(self, alpha_param=0.001, lambda_param=0.01, n_iterations=30000):
         self.alpha_param = alpha_param
         self.lambda_param = lambda_param
         self.n_iterations = n_iterations
@@ -53,29 +53,48 @@ class LinearSVM:
 # Description: finds weights and bias of a hyperplane with largest possible margins for classification between 2 classes
 
     def training(self, X, y):
-        n_features = X.shape[1]
+        n_samples, n_features = X.shape
 
         y_ = np.where(y <= 0, -1, 1)  # adjust y values to -1 or 1 for classification
 
         self.w = np.zeros(n_features)
         self.b = 0
 
-        for _ in range(self.n_iterations):
+        #         epsilon_param = 0.000001
+        epsilon_param = 3e-6
+        epsilon_flag = True
+        current_iteration = 0
+        J_previous = 9999
+
+        while (current_iteration < self.n_iterations) and epsilon_flag:
+
+            hingeLoss = 0
+
             for i, sample in enumerate(X):
-                hyperplaneFunc = y_[i] * (np.dot(sample, self.w) - self.b) >= 1  # J = λw^2 + sum(max(0, 1-yi(wx-b))
+
+                # @@@@@@@@@ COMMENT @@@@@@@@@
+                hyperplaneFunc = y_[i] * (np.dot(sample, self.w) - self.b) >= 1
+                hingeLoss += max(0, 1 - hyperplaneFunc)
 
                 gradient_0_w = 2 * self.lambda_param * self.w  # dJ/dw = 2λw
                 gradient_0_b = 0  # dJ/db = 0
                 gradient_1_w = 2 * self.lambda_param * self.w - np.dot(sample, y_[i])  # dJ/dw = 2λw - yixi
                 gradient_1_b = y_[i]  # dJ/db = yi
 
+                # gradient descent
                 if hyperplaneFunc:
                     self.w -= self.alpha_param * gradient_0_w  # w = w - α * dJ/dw
                     self.b -= self.alpha_param * gradient_0_b  # b = b - α * dJ/db
                 else:
                     self.w -= self.alpha_param * gradient_1_w  # w = w - α * dJ/dw
                     self.b -= self.alpha_param * gradient_1_b  # b = b - α * dJ/db
-        return self.w, self.b
+
+            current_iteration += 1
+            J_current = (hingeLoss / n_samples) + (self.lambda_param * (np.linalg.norm(self.w) ** 2))
+            epsilon_flag = (abs(J_current - J_previous)) > epsilon_param
+            J_previous = J_current
+
+        return self.w, self.b, current_iteration
 
 # predict():
 # input:
