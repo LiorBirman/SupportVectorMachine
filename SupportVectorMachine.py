@@ -89,6 +89,7 @@ class LinearSVM:
                     self.w -= self.alpha_param * gradient_1_w  # w = w - α * dJ/dw
                     self.b -= self.alpha_param * gradient_1_b  # b = b - α * dJ/db
 
+            print(current_iteration)
             current_iteration += 1
             J_current = (hingeLoss / n_samples) + (self.lambda_param * (np.linalg.norm(self.w) ** 2))
             epsilon_flag = (abs(J_current - J_previous)) > epsilon_param
