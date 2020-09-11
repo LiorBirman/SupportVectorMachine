@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import SupportVectorMachine as SVM
+from matplotlib import gridspec
 
 # getHyperplane():
 # input:
@@ -14,6 +15,7 @@ import SupportVectorMachine as SVM
 
 def getHyperplane(X, w, b, offset):
     return (-w[0] * X + b + offset) / w[1]
+
 
 # calculateHyperplaneAndMargins():
 # input:
@@ -41,6 +43,7 @@ def calculateHyperplaneAndMargins(X, w, b):
 
     return x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max
 
+
 # plotLines():
 # input:
 #       (x1_min, x2_hyperplane_min) & (x1_max, x2_hyperplane_max)= hyperplane edge points
@@ -50,10 +53,11 @@ def calculateHyperplaneAndMargins(X, w, b):
 #       None
 # Description: draws hyperplane & margins on window
 
-def plotLines(ax, x0_1, x0_2, x1_1, x1_2, x_1_1_bottom, x_1_2_bottom, x_1_1_top, x_1_2_top):
-    ax.plot([x0_1, x0_2], [x1_1, x1_2], 'y--')
-    ax.plot([x0_1, x0_2], [x_1_1_bottom, x_1_2_bottom], 'k')
-    ax.plot([x0_1, x0_2], [x_1_1_top, x_1_2_top], 'k')
+def plotLines(ax, x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max):
+    ax.plot([x1_min, x1_max], [x2_hyperplane_min, x2_hyperplane_max], 'y--')
+    ax.plot([x1_min, x1_max], [x2_bottom_min, x2_bottom_max], 'k')
+    ax.plot([x1_min, x1_max], [x2_top_min, x2_top_max], 'k')
+
 
 # plotData():
 # input:
@@ -67,6 +71,7 @@ def plotLines(ax, x0_1, x0_2, x1_1, x1_2, x_1_1_bottom, x_1_2_bottom, x_1_1_top,
 def plotData(X, y, marker):
     color = np.where(y >= 1, 'r', 'b')
     plt.scatter(X[:, 0], X[:, 1], marker=marker, c=color)
+
 
 # plotSVM():
 # input:
@@ -82,39 +87,44 @@ def plotData(X, y, marker):
 #       window with drawn data
 # Description: draws data input on window in different subplots
 
-def plotSVM(X, X_test, y, y_test, w, b, fig_title, y_predicted, iters):
+def plotSVM(X, X_cv, y, y_cv, w, b, fig_title, y_predicted, iters, lambda_param, alpha_param, samples):
     fig = plt.figure()
     fig.suptitle(fig_title, fontsize=40)
 
-    x0_1, x0_2, x1_1, x1_2, x_1_1_bottom, x_1_2_bottom, x_1_1_top, x_1_2_top = calculateHyperplaneAndMargins(X, w, b)
+    x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max = calculateHyperplaneAndMargins(X, w, b)
 
-    ax = fig.add_subplot(2, 2, 1)
+    ax = fig.add_subplot(221)
     ax.set_title("Training", fontsize=25)
+
+    ax.set_ylim([x1_min - 10, x1_max])
 
     # plot training, hyperplane & margins
     marker = 'o'
     plotData(X, y, marker)
-    plotLines(ax, x0_1, x0_2, x1_1, x1_2, x_1_1_bottom, x_1_2_bottom, x_1_1_top, x_1_2_top)
+    plotLines(ax, x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max)
 
-    ax = fig.add_subplot(2, 2, 2)
-    ax.set_title("Prediction", fontsize=25)
+    ax = fig.add_subplot(222)
+    ax.set_title("Cross Validation", fontsize=25)
+    ax.set_ylim([x1_min - 10, x1_max])
 
     # plot prediction, hyperplane & margins
     marker = 'x'
-    plotData(X_test, y_test, marker)
-    plotLines(ax, x0_1, x0_2, x1_1, x1_2, x_1_1_bottom, x_1_2_bottom, x_1_1_top, x_1_2_top)
+    plotData(X_cv, y_cv, marker)
+    plotLines(ax, x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max)
 
-    ax = fig.add_subplot(2, 2, 4)
-    score, precision, recall = SVM.f1_score(y_test, y_predicted)
-    score_text = "F1_Score: {}".format(score)
-    recall_text = "Recall: {}".format(recall)
-    precision_text = "Precision: {}".format(precision)
-    plt.text(0.018, 0.893, score_text, fontsize=20)
-    plt.text(0.018, 0.693, recall_text, fontsize=20)
-    plt.text(0.018, 0.593, precision_text, fontsize=20)
+    ax = fig.add_subplot(223)
+    plt.text(0.018, 0.893, "Number Of Samples: {}".format(samples * 0.7), fontsize=15)
+    plt.text(0.018, 0.793, "Training Iterations: {}".format(iters), fontsize=15)
+    plt.text(0.018, 0.593, "Alpha Parameter: {}".format(alpha_param), fontsize=15)
+    plt.text(0.018, 0.493, "Lambda Parameter: {}".format(lambda_param), fontsize=15)
 
-    ax = fig.add_subplot(2, 2, 3)
-    plt.text(0.018, 0.893, "Training Iterations: {}".format(iters), fontsize=20)
+    ax = fig.add_subplot(224)
+    score, precision, recall = SVM.f1_score(y_cv, y_predicted)
+    plt.text(0.018, 0.893, "Number Of Samples: {}".format(int(samples * 0.3)), fontsize=15)
+    plt.text(0.018, 0.693, "F1_Score: {}".format(score), fontsize=15)
+    plt.text(0.018, 0.593, "Recall: {}".format(recall), fontsize=15)
+    plt.text(0.018, 0.493, "Precision: {}".format(precision), fontsize=15)
 
 
+    plt.get_current_fig_manager().window.showMaximized()
     plt.show()

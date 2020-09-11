@@ -37,7 +37,7 @@ class LinearSVM:
 
 # Constructor
 
-    def __init__(self, alpha_param=0.001, lambda_param=0.01, n_iterations=30000):
+    def __init__(self, alpha_param=0.001, lambda_param=0.01, n_iterations=10000):
         self.alpha_param = alpha_param
         self.lambda_param = lambda_param
         self.n_iterations = n_iterations
@@ -61,7 +61,7 @@ class LinearSVM:
         self.b = 0
 
         #         epsilon_param = 0.000001
-        epsilon_param = 3e-6
+        epsilon_param = 1e-7
         epsilon_flag = True
         current_iteration = 0
         J_previous = 9999
@@ -89,11 +89,18 @@ class LinearSVM:
                     self.w -= self.alpha_param * gradient_1_w  # w = w - α * dJ/dw
                     self.b -= self.alpha_param * gradient_1_b  # b = b - α * dJ/db
 
-            print("Iteration: ", current_iteration)
             current_iteration += 1
-            J_current = (hingeLoss / n_samples) + (self.lambda_param * (np.linalg.norm(self.w) ** 2))
-            epsilon_flag = (abs(J_current - J_previous)) > epsilon_param
-            J_previous = J_current
+
+            if current_iteration % 500 == 0:
+               print("Current Iteration: {}".format(current_iteration))
+
+            # J_current = (hingeLoss / n_samples) + (self.lambda_param * (np.linalg.norm(self.w) ** 2))
+            # epsilon_flag = (abs(J_current - J_previous)) > epsilon_param
+            # print("Epsilon_param", epsilon_param)
+            # print("J_current - J_previous: ", float(abs(J_current - J_previous)))
+            # J_previous = J_current
+
+        print("Current Iteration: {}".format(current_iteration))
 
         return self.w, self.b, current_iteration
 

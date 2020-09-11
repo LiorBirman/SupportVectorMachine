@@ -40,41 +40,60 @@ def dataGenerator(n_samples, cluster_std, n_features=2, centers=2, random_state=
 # Description: generates data for prediction, predicts the classification and draws on screen
 
 
-def predictAndPlot(X, y, n_samples, cluster_std, fig_title, w, b, iters):
-    # prediction data generation
-    X_test, y_test = dataGenerator(n_samples, cluster_std)
+#def predictAndPlot(X, y, n_samples, cluster_std, fig_title, w, b, iters):
 
-    # predict classifications with X_test & y_test data
-    y_predicted = svm_object.predict(X_test)
 
-    p.plotSVM(X, X_test, y, y_test, w, b, fig_title, y_predicted, iters)
+    #p.plotSVM(X, X_test, y, y_test, w, b, fig_title, y_predicted, iters)
 
 
 # create SVM object
-svm_object = LinearSVM()
+lambda_param = 0.01
+alpha_param = 0.001
+svm_object = LinearSVM(lambda_param=lambda_param, alpha_param=alpha_param, n_iterations=10)
 
-# training data generation
-samples = 150
+# data generation
+samples = 500
 clusterStd = 2
-X, y = dataGenerator(samples, clusterStd)
+whole_data, whole_labels = dataGenerator(samples, clusterStd)
 
-# train classifications with X & y data
+# 70% for training, 30% for cross validation
+training_portion = int(samples * 0.7)
+
+# training data
+X = whole_data[0:training_portion, :]
+y = whole_labels[0:training_portion]
+
+# cross validation data
+X_cv = whole_data[training_portion::, :]
+y_cv = whole_labels[training_portion::]
+
+# train classifications with training data
 w, b, iterations = svm_object.training(X, y)
 
-# cross validation
-samples = 30
-clusterStd = 2
+# predict classifications of cross validation data
+y_predicted = svm_object.predict(X_cv)
+
+# show on screen
 figure_title = "Training & Classification"
-predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
+p.plotSVM(X, X_cv, y, y_cv, w, b, figure_title, y_predicted, iterations, lambda_param, alpha_param, samples)
 
-# test with noise
-samples = 30
-clusterStd = 3
-figure_title = "Noisy Data Test"
-predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
 
-# test with bigger noise
-samples = 30
-clusterStd = 7
-figure_title = "Bigger Noise Data Test"
-predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
+
+
+
+
+
+
+# # predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
+#
+# # test with noise
+# samples = 30
+# clusterStd = 3
+# figure_title = "Noisy Data Test"
+# predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
+#
+# # test with bigger noise
+# samples = 30
+# clusterStd = 7
+# figure_title = "Bigger Noise Data Test"
+# predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
