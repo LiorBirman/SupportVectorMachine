@@ -27,29 +27,11 @@ def dataGenerator(n_samples, cluster_std, n_features=2, centers=2, random_state=
     return X, y
 
 
-# predictAndPlot():
-# input:
-#       X = data set
-#       y = data labels
-#       n_samples = number of samples to generate
-#       cluster_std = standard deviation spread
-#       fig_title = title of plotted figure
-#       svm = SVM class object
-# output:
-#       None
-# Description: generates data for prediction, predicts the classification and draws on screen
-
-
-#def predictAndPlot(X, y, n_samples, cluster_std, fig_title, w, b, iters):
-
-
-    #p.plotSVM(X, X_test, y, y_test, w, b, fig_title, y_predicted, iters)
-
-
 # create SVM object
+alpha_param = 0.0001
 lambda_param = 0.01
-alpha_param = 0.001
-svm_object = LinearSVM(lambda_param=lambda_param, alpha_param=alpha_param, n_iterations=10)
+n_iterations = 15000
+svm_object = LinearSVM(alpha_param=alpha_param, lambda_param=lambda_param, n_iterations=n_iterations)
 
 # data generation
 samples = 500
@@ -58,6 +40,7 @@ whole_data, whole_labels = dataGenerator(samples, clusterStd)
 
 # 70% for training, 30% for cross validation
 training_portion = int(samples * 0.7)
+prediction_portion = int(samples * 0.3)
 
 # training data
 X = whole_data[0:training_portion, :]
@@ -75,25 +58,17 @@ y_predicted = svm_object.predict(X_cv)
 
 # show on screen
 figure_title = "Training & Classification"
-p.plotSVM(X, X_cv, y, y_cv, w, b, figure_title, y_predicted, iterations, lambda_param, alpha_param, samples)
+p.plotSVM(X, X_cv, y, y_cv, w, b, figure_title, y_predicted, iterations, lambda_param, alpha_param, samples, training_portion, prediction_portion)
 
 
+# new prediction data generation
+samples = 166
+clusterStd = 5
+X_test, y_test = dataGenerator(samples, clusterStd)
 
+# predict classifications of cross validation data
+y_predicted = svm_object.predict(X_test)
 
-
-
-
-
-# # predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
-#
-# # test with noise
-# samples = 30
-# clusterStd = 3
-# figure_title = "Noisy Data Test"
-# predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
-#
-# # test with bigger noise
-# samples = 30
-# clusterStd = 7
-# figure_title = "Bigger Noise Data Test"
-# predictAndPlot(X, y, samples, clusterStd, figure_title, w, b, iterations)
+# show on screen
+figure_title = "Original Training & Noisy Data Classification"
+p.plotSVM(X, X_test, y, y_test, w, b, figure_title, y_predicted, iterations, lambda_param, alpha_param, samples, training_portion, prediction_portion)

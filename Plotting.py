@@ -87,14 +87,14 @@ def plotData(X, y, marker):
 #       window with drawn data
 # Description: draws data input on window in different subplots
 
-def plotSVM(X, X_cv, y, y_cv, w, b, fig_title, y_predicted, iters, lambda_param, alpha_param, samples):
+def plotSVM(X, X_cv, y, y_cv, w, b, fig_title, y_predicted, iters, lambda_param, alpha_param, samples, training_portion, prediction_portion):
     fig = plt.figure()
-    fig.suptitle(fig_title, fontsize=40)
+    fig.suptitle(fig_title, fontsize=30)
 
     x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max = calculateHyperplaneAndMargins(X, w, b)
 
     ax = fig.add_subplot(221)
-    ax.set_title("Training", fontsize=25)
+    ax.set_title("Training", fontsize=20)
 
     ax.set_ylim([x1_min - 10, x1_max])
 
@@ -104,7 +104,7 @@ def plotSVM(X, X_cv, y, y_cv, w, b, fig_title, y_predicted, iters, lambda_param,
     plotLines(ax, x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max)
 
     ax = fig.add_subplot(222)
-    ax.set_title("Cross Validation", fontsize=25)
+    ax.set_title("Classification", fontsize=20)
     ax.set_ylim([x1_min - 10, x1_max])
 
     # plot prediction, hyperplane & margins
@@ -113,17 +113,17 @@ def plotSVM(X, X_cv, y, y_cv, w, b, fig_title, y_predicted, iters, lambda_param,
     plotLines(ax, x1_min, x1_max, x2_hyperplane_min, x2_hyperplane_max, x2_bottom_min, x2_bottom_max, x2_top_min, x2_top_max)
 
     ax = fig.add_subplot(223)
-    plt.text(0.018, 0.893, "Number Of Samples: {}".format(samples * 0.7), fontsize=15)
+    plt.text(0.018, 0.893, "Number Of Samples: {}".format(training_portion), fontsize=15)
     plt.text(0.018, 0.793, "Training Iterations: {}".format(iters), fontsize=15)
     plt.text(0.018, 0.593, "Alpha Parameter: {}".format(alpha_param), fontsize=15)
     plt.text(0.018, 0.493, "Lambda Parameter: {}".format(lambda_param), fontsize=15)
 
     ax = fig.add_subplot(224)
     score, precision, recall = SVM.f1_score(y_cv, y_predicted)
-    plt.text(0.018, 0.893, "Number Of Samples: {}".format(int(samples * 0.3)), fontsize=15)
-    plt.text(0.018, 0.693, "F1_Score: {}".format(score), fontsize=15)
-    plt.text(0.018, 0.593, "Recall: {}".format(recall), fontsize=15)
-    plt.text(0.018, 0.493, "Precision: {}".format(precision), fontsize=15)
+    plt.text(0.018, 0.893, "Number Of Samples: {}".format(prediction_portion), fontsize=15)
+    plt.text(0.018, 0.693, "F1_Score: {:.3f}".format(score), fontsize=15)
+    plt.text(0.018, 0.593, "Recall: {:.3f}".format(recall), fontsize=15)
+    plt.text(0.018, 0.493, "Precision: {:.3f}".format(precision), fontsize=15)
 
 
     plt.get_current_fig_manager().window.showMaximized()

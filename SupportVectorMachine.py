@@ -37,7 +37,7 @@ class LinearSVM:
 
 # Constructor
 
-    def __init__(self, alpha_param=0.001, lambda_param=0.01, n_iterations=10000):
+    def __init__(self, alpha_param=0.0001, lambda_param=0.01, n_iterations=15000):
         self.alpha_param = alpha_param
         self.lambda_param = lambda_param
         self.n_iterations = n_iterations
@@ -60,22 +60,30 @@ class LinearSVM:
         self.w = np.zeros(n_features)
         self.b = 0
 
-        #         epsilon_param = 0.000001
-        epsilon_param = 1e-7
+        epsilon_param = 1e-12
         epsilon_flag = True
         current_iteration = 0
-        J_previous = 9999
+
+        costFunc_current = 999999
+        costFunc_previous = 0
+
+        costFunc_grad_1_current = 9999
+        costFunc_grad_1_previous = 0
+        costFunc_grad_2 = 99999999
 
         while (current_iteration < self.n_iterations) and epsilon_flag:
 
-            hingeLoss = 0
+            hingeLossSum = 0
 
             for i, sample in enumerate(X):
 
-                # @@@@@@@@@ COMMENT @@@@@@@@@
+                # check if current point's position is between margins
                 hyperplaneFunc = y_[i] * (np.dot(sample, self.w) - self.b) >= 1
-                hingeLoss += max(0, 1 - hyperplaneFunc)
 
+                # sum of all points' hinge loss
+                hingeLossSum += max(0, 1 - hyperplaneFunc)
+
+                # gradients
                 gradient_0_w = 2 * self.lambda_param * self.w  # dJ/dw = 2λw
                 gradient_0_b = 0  # dJ/db = 0
                 gradient_1_w = 2 * self.lambda_param * self.w - np.dot(sample, y_[i])  # dJ/dw = 2λw - yixi
@@ -89,18 +97,25 @@ class LinearSVM:
                     self.w -= self.alpha_param * gradient_1_w  # w = w - α * dJ/dw
                     self.b -= self.alpha_param * gradient_1_b  # b = b - α * dJ/db
 
+            # costFunc_grad_1_current = costFunc_current - costFunc_previous | approximate gradient value
+            # costFunc_grad_2 = costFunc_grad_1_current - costFunc_grad_1_previous | approximate second gradient value
+            # if costFunc_grad_2 <= epsilon then a minimum is found
+            costFunc_previous = costFunc_current
+            costFunc_current = (hingeLossSum / n_samples) + (self.lambda_param * (np.linalg.norm(self.w) ** 2))
+
+            costFunc_grad_1_previous = costFunc_grad_1_current
+            costFunc_grad_1_current = abs(costFunc_current - costFunc_previous)
+
+            costFunc_grad_2 = abs(costFunc_grad_1_current - costFunc_grad_1_previous)
+            epsilon_flag = (costFunc_grad_2 > epsilon_param)
+
+            # print iteration for every milestone and increment iteration
+            if current_iteration % 500 == 0:
+                print("Current Iteration: {}".format(current_iteration))
             current_iteration += 1
 
-            if current_iteration % 500 == 0:
-               print("Current Iteration: {}".format(current_iteration))
-
-            # J_current = (hingeLoss / n_samples) + (self.lambda_param * (np.linalg.norm(self.w) ** 2))
-            # epsilon_flag = (abs(J_current - J_previous)) > epsilon_param
-            # print("Epsilon_param", epsilon_param)
-            # print("J_current - J_previous: ", float(abs(J_current - J_previous)))
-            # J_previous = J_current
-
-        print("Current Iteration: {}".format(current_iteration))
+        # print last iteration
+        print("Last Iteration: {}".format(current_iteration))
 
         return self.w, self.b, current_iteration
 
@@ -114,3 +129,9 @@ class LinearSVM:
     def predict(self, X):
         prediction = np.dot(X, self.w) - self.b
         return np.sign(prediction)
+
+
+
+
+
+# print("costFunc_current = {}, costFunc_grad_1_current = {}, costFunc_grad_2 = {}".format(costFunc_current, costFunc_grad_1_current, costFunc_grad_2))

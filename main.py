@@ -19,3 +19,10 @@
 #               - Bigger noise data will be generated.
 #               - Bigger noise data prediction will occur.
 #               - The training and data results will be shown on a window.
+
+import matplotlib.pyplot as plt
+plt.figure()
+x = 0.9876543
+plt.text(0.018, 0.493, "{:.3f}".format(x))
+
+plt.show()
