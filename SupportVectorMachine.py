@@ -60,17 +60,22 @@ class LinearSVM:
         self.w = np.zeros(n_features)
         self.b = 0
 
+        # tolerance value
         epsilon_param = 1e-12
         epsilon_flag = True
-        current_iteration = 0
 
+        # const function initialization
         costFunc_current = 999999
         costFunc_previous = 0
 
+        # gradient initialization
         costFunc_grad_1_current = 9999
         costFunc_grad_1_previous = 0
+
+        # second gradient initialization
         costFunc_grad_2 = 99999999
 
+        current_iteration = 0
         while (current_iteration < self.n_iterations) and epsilon_flag:
 
             hingeLossSum = 0
@@ -129,9 +134,3 @@ class LinearSVM:
     def predict(self, X):
         prediction = np.dot(X, self.w) - self.b
         return np.sign(prediction)
-
-
-
-
-
-# print("costFunc_current = {}, costFunc_grad_1_current = {}, costFunc_grad_2 = {}".format(costFunc_current, costFunc_grad_1_current, costFunc_grad_2))
